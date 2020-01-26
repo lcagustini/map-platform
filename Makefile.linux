@@ -1,6 +1,13 @@
+TARGET = bin/main
+
+INCDIR = ./include/
+CFLAGS = -Wall -O2 -std=c11
+
+LIBS = -lSDL2 -lm
+
 all:
 	@mkdir -p bin
-	gcc src/main.c -o bin/main -lSDL2 -O3 -Wall -I./include -lm
+	gcc src/main.c -o $(TARGET) $(addprefix -I,$(INCDIR)) $(CFLAGS) $(LIBS)
 
 clean:
 	rm -rf bin

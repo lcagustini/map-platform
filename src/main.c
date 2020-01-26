@@ -14,11 +14,12 @@
 
 #include <pspgu.h>
 #include <pspgum.h>
+
+#include "pspcallback.c"
 #endif
 
 #ifdef PSP_BUILD
 #include <SDL.h>
-#include "pspcallback.c"
 #else
 #include <SDL2/SDL.h>
 #endif
@@ -34,8 +35,8 @@ PSP_HEAP_SIZE_MAX();
 #define SCREEN_WIDTH 480
 #define SCREEN_HEIGHT 272
 #else
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 3*480
+#define SCREEN_HEIGHT 3*272
 #endif
 
 SDL_Window *window;
