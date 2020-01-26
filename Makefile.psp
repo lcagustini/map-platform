@@ -2,7 +2,7 @@ TARGET = bin/main
 OBJS = src/main.o
 
 INCDIR = ./include/psp ./include/
-CFLAGS = -G0 -Wall -O2 -std=c11
+CFLAGS = -G0 -Wall -Ofast -std=c11
 CFLAGS += -DPSP_BUILD
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
