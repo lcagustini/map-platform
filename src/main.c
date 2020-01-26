@@ -18,6 +18,7 @@
 
 #ifdef PSP_BUILD
 #include <SDL.h>
+#include "pspcallback.c"
 #else
 #include <SDL2/SDL.h>
 #endif
@@ -61,6 +62,9 @@ SDL_Texture* loadTexture(const char *path) {
 }
 
 int main(void) {
+#ifdef PSP_BUILD
+    PSPSetupCallbacks();
+#endif
     SDL_Init(SDL_INIT_VIDEO);
 
     window = SDL_CreateWindow("platform", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
