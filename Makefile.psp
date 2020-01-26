@@ -1,0 +1,21 @@
+TARGET = bin/main
+OBJS = src/main.o
+
+INCDIR = ./include/psp ./include/
+CFLAGS = -G0 -Wall -O2 -std=c11
+CFLAGS += -DPSP_BUILD
+CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
+ASFLAGS = $(CFLAGS)
+
+LIBDIR = ./lib/psp
+LIBS = -lSDL2
+LIBS += -lpspaudiolib -lpspaudio
+LIBS += -lpspgum -lpspgu -lm
+LIBS += -lglut -lGLU -lGL
+LIBS += -lpsprtc -lpspvfpu -lpspvram  -lpsphprm
+
+EXTRA_TARGETS = EBOOT.PBP
+PSP_EBOOT_TITLE = Platform
+
+PSPSDK=$(shell psp-config --pspsdk-path)
+include $(PSPSDK)/lib/build.mak
