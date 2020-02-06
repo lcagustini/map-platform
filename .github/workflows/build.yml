@@ -42,5 +42,12 @@ jobs:
         sudo apt-get update -y -qq
         sudo apt-get install -y g++ build-essential autoconf automake cmake doxygen bison flex libncurses5-dev libsdl1.2-dev libreadline-dev libusb-dev texinfo libgmp3-dev libmpfr-dev libelf-dev libmpc-dev libfreetype6-dev zlib1g-dev libtool libtool-bin subversion git tcl unzip wget
         sudo ./toolchain-sudo.sh
+    - name: Install pspsdk
+      run: |
+        git clone https://github.com/pspdev/pspsdk
+        cd pspsdk
+        ./configure
+        make
+        make install
     - name: Compile
       run: make psp
