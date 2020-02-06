@@ -46,7 +46,9 @@ jobs:
       run: |
         git clone https://github.com/pspdev/pspsdk
         cd pspsdk
-        ./configure
+        ./bootstrap
+        mkdir -p build-psp && pushd build-psp
+        ../configure --with-pspdev=/usr/local --target=psp
         make
         make install
     - name: Compile
