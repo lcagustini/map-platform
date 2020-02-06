@@ -43,130 +43,88 @@ PSP_HEAP_SIZE_MAX();
 
 SDL_Window *window;
 SDL_Renderer *renderer;
+float dt;
 
-struct object {
-    SDL_Rect rect;
-    SDL_Texture *texture;
-};
+#include "render.c"
+#include "object.c"
+#include "bg.c"
 
-struct input {
-    SDL_Joystick *controllers[4];
-    int controllers_count;
-};
-
-enum tile_hit_type {
-    THT_NONE,
-    THT_WALL,
-};
-
-struct screen_map {
-    uint8_t tiles[60][34];
-    SDL_Texture *tile_textures[256];
-    enum tile_hit_type tile_hit_types[256];
-};
-
-SDL_Texture *loadTexture(const char *path, int *t_width, int *t_height) {
-    int width, height, channels;
-    uint8_t *image = stbi_load(path, &width, &height, &channels, STBI_rgb_alpha);
-    uint32_t rmask = 0x000000ff;
-    uint32_t gmask = 0x0000ff00;
-    uint32_t bmask = 0x00ff0000;
-    uint32_t amask = 0xff000000;
-
-    if (t_width) *t_width = width;
-    if (t_height) *t_height = height;
-
-    SDL_Surface *surf = SDL_CreateRGBSurfaceFrom(image, width, height, STBI_rgb_alpha*8, STBI_rgb_alpha*width, rmask, gmask, bmask, amask);
-    if (surf) {
-        SDL_Texture *text = SDL_CreateTextureFromSurface(renderer, surf);
-        SDL_FreeSurface(surf);
-        return text;
-    }
-    return NULL;
+bool groundedObject(int index) {
+    return (!cur_map.tiles[(int)(objects[index].x + objects[index].rect.w/2)/8][(int)(objects[index].y + objects[index].rect.h)/8]);
 }
 
-bool initObject(int x, int y, const char *texture_path, struct object *obj) {
-    obj->texture = loadTexture(texture_path, &obj->rect.w, &obj->rect.h);
-    if (obj->texture) {
-        obj->rect.x = x;
-        obj->rect.y = y;
-
-        return true;
-    }
-
-    return false;
-}
-
-bool loadScreen(int index, struct screen_map *map) {
-    map->tile_textures[0] = loadTexture("gfx/brick.png", NULL, NULL);
-    map->tile_hit_types[0] = THT_WALL;
-
-    map->tile_textures[1] = loadTexture("gfx/wall.png", NULL, NULL);
-    map->tile_hit_types[1] = THT_NONE;
-
-    for (int y = 0; y < 34; y++) {
-        for (int x = 0; x < 60; x++) {
-            if (y % 10) map->tiles[x][y] = 1;
-            else map->tiles[x][y] = 0;
-        }
-    }
-
-    return true;
-}
+#include "input.c"
 
 int main(void) {
 #ifdef PSP_BUILD
     PSPSetupCallbacks();
 #endif
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
-
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
     window = SDL_CreateWindow("platform", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+#ifndef PSP_BUILD
+    SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
+#endif
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0xFF, 0xFF);
 
 #ifndef PSP_BUILD
     SDL_RenderSetScale(renderer, ZOOM, ZOOM);
 #endif
 
-    struct input input = {0};
-    input.controllers_count = SDL_NumJoysticks();
-    for (int i = 0; i < input.controllers_count; i++) input.controllers[i] = SDL_JoystickOpen(i);
+    controller = SDL_JoystickOpen(0);
 
-    struct screen_map test_screen = {0};
-    loadScreen(0, &test_screen);
+    loadBG(0);
 
-    struct object player;
-    initObject(0, 0, "gfx/player.png", &player);
+    initObject(0, 10, 10, "gfx/player.png");
 
     SDL_Event e;
+    uint64_t last_frame_counter = SDL_GetPerformanceCounter();
     while (true) {
+        {
+            uint64_t cur_frame_counter = SDL_GetPerformanceCounter();
+            dt = (float)(cur_frame_counter - last_frame_counter) / SDL_GetPerformanceFrequency();
+            last_frame_counter = cur_frame_counter;
+        }
+
         while(SDL_PollEvent(&e)) {
             if(e.type == SDL_QUIT) goto exit;
         }
+        handle_constant_input();
 
-        if (input.controllers_count) {
-            int16_t left_x = SDL_JoystickGetAxis(input.controllers[0], 0)/(INT16_MAX/2);
-            int16_t left_y = SDL_JoystickGetAxis(input.controllers[0], 1)/(INT16_MAX/2);
+        objects[0].speed_y += dt*1;
+        if (groundedObject(0) && objects[0].speed_y > 0)
+            objects[0].speed_y = 0;
+        objects[0].y += objects[0].speed_y;
 
-            player.rect.x += left_x;
-            player.rect.y += left_y;
-        }
+        objects[0].speed_x *= (1-dt)*0.999;
+        if (!cur_map.tiles[(int)objects[0].x/8][(int)objects[0].y/8] && objects[0].speed_x < 0)
+            objects[0].speed_x = 0;
+        if (!cur_map.tiles[(int)(objects[0].x + objects[0].rect.w)/8][(int)objects[0].y/8] && objects[0].speed_x > 0)
+            objects[0].speed_x = 0;
+        objects[0].x += objects[0].speed_x;
 
         SDL_RenderClear(renderer);
 
         for (int y = 0; y < 34; y++) {
             for (int x = 0; x < 60; x++) {
                 SDL_Rect target = {.x = x*8, .y = y*8, .w = 8, .h = 8};
-                SDL_RenderCopy(renderer, test_screen.tile_textures[test_screen.tiles[x][y]], NULL, &target);
+                SDL_RenderCopy(renderer, cur_map.tile_textures[cur_map.tiles[x][y]], NULL, &target);
             }
         }
-        SDL_RenderCopy(renderer, player.texture, NULL, &player.rect);
+
+        for (int i = 0; i < OBJECT_MAX; i++) {
+            if (!objects[i].texture) continue;
+            objects[i].rect.x = objects[i].x;
+            objects[i].rect.y = objects[i].y;
+            SDL_RenderCopy(renderer, objects[i].texture, NULL, &objects[i].rect);
+        }
 
         SDL_RenderPresent(renderer);
     }
 
 exit:
-    for (int i = 0; i < input.controllers_count; i++) SDL_JoystickClose(input.controllers[i]);
+    if (controller) SDL_JoystickClose(controller);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
