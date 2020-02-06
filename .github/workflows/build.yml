@@ -1,17 +1,40 @@
 name: Build test
-on: [push]
+on:
+  push:
+    branches: 
+      - master
 
 jobs:
-  build:
+  check:
+    runs-on: [ubuntu-latest]
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install cppcheck
+        run: sudo apt-get install cppcheck
+      - name: Check code
+        run: cppcheck --enable=all --force src/
 
+  build_linux:
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v2
-    - name: install_dependencies
+    - name: Install dependencies
       run: |
         sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu `lsb_release -sc` main universe restricted multiverse"
         sudo apt-get update -y -qq
         sudo apt-get install libsdl2-dev
-    - name: make linux
+    - name: Compile
       run: make linux
+
+  build_psp:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        sudo apt-get install git
+    - name: Compile
+      run: make psp
