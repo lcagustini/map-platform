@@ -52,6 +52,6 @@ jobs:
         make
         make install
       env:
-        PATH: $PATH:/usr/local/pspdev/bin
+        PATH: ${{ env.PATH }}:/usr/local/pspdev/bin
     - name: Compile
       run: make psp
