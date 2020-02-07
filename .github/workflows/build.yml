@@ -52,5 +52,6 @@ jobs:
         ../configure --with-pspdev=/usr/local --target=psp
         make
         make install
+        echo ::set-env name=PATH::$PATH
     - name: Compile
       run: make psp
