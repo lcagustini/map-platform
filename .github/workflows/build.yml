@@ -51,7 +51,7 @@ jobs:
         mkdir -p build-psp && pushd build-psp
         ../configure --with-pspdev=/usr/local --target=psp
         make
-        make install
+        sudo make install
         echo ::set-env name=PATH::$PATH:/usr/local/pspdev/bin
     - name: Compile
       run: make psp
