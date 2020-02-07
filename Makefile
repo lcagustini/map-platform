@@ -1,3 +1,6 @@
+check:
+	cppcheck --enable=all --force src/
+
 linux:
 	make -f Makefile.linux
 

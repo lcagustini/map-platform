@@ -62,8 +62,10 @@ int main(void) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
     window = SDL_CreateWindow("platform", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
+#if 0
 #ifndef PSP_BUILD
     SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
+#endif
 #endif
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0xFF, 0xFF);
