@@ -31,15 +31,16 @@ PSP_HEAP_SIZE_MAX();
 #define printf	pspDebugScreenPrintf
 #endif
 
-#define ZOOM 3
-
 #ifdef PSP_BUILD
-#define SCREEN_WIDTH 480
-#define SCREEN_HEIGHT 272
+#define ZOOM 1
 #else
+#define ZOOM 3
+#endif
+
+#define REFERENCE_SCREEN_WIDTH 480
+#define REFERENCE_SCREEN_HEIGHT 272
 #define SCREEN_WIDTH ZOOM*480
 #define SCREEN_HEIGHT ZOOM*272
-#endif
 
 SDL_Window *window;
 SDL_Renderer *renderer;
@@ -50,7 +51,7 @@ float dt;
 #include "bg.c"
 
 bool groundedObject(int index) {
-    return (!cur_map.tiles[(int)(objects[index].x + objects[index].rect.w/2)/8][(int)(objects[index].y + objects[index].rect.h)/8]);
+    return (cur_map.tile_hit_types[cur_map.tiles[(int)(objects[index].x + objects[index].rect.w/2)/8][(int)(objects[index].y + objects[index].rect.h)/8]]);
 }
 
 #include "input.c"
@@ -76,7 +77,8 @@ int main(void) {
 
     controller = SDL_JoystickOpen(0);
 
-    loadBG(0);
+    loadBG(1);
+    updateBGTexture();
 
     initObject(0, 10, 10, "gfx/player.png");
 
@@ -100,20 +102,15 @@ int main(void) {
         objects[0].y += objects[0].speed_y;
 
         objects[0].speed_x *= (1-dt)*0.999;
-        if (!cur_map.tiles[(int)objects[0].x/8][(int)objects[0].y/8] && objects[0].speed_x < 0)
+        if (cur_map.tile_hit_types[cur_map.tiles[(int)objects[0].x/8][(int)objects[0].y/8]] && objects[0].speed_x < 0)
             objects[0].speed_x = 0;
-        if (!cur_map.tiles[(int)(objects[0].x + objects[0].rect.w)/8][(int)objects[0].y/8] && objects[0].speed_x > 0)
+        if (cur_map.tile_hit_types[cur_map.tiles[(int)(objects[0].x + objects[0].rect.w)/8][(int)objects[0].y/8]] && objects[0].speed_x > 0)
             objects[0].speed_x = 0;
         objects[0].x += objects[0].speed_x;
 
         SDL_RenderClear(renderer);
 
-        for (int y = 0; y < 34; y++) {
-            for (int x = 0; x < 60; x++) {
-                SDL_Rect target = {.x = x*8, .y = y*8, .w = 8, .h = 8};
-                SDL_RenderCopy(renderer, cur_map.tile_textures[cur_map.tiles[x][y]], NULL, &target);
-            }
-        }
+        SDL_RenderCopy(renderer, cur_map.screen_texture, NULL, NULL);
 
         for (int i = 0; i < OBJECT_MAX; i++) {
             if (!objects[i].texture) continue;
