@@ -55,6 +55,5 @@ jobs:
         ../configure --with-pspdev=/usr/local --target=psp
         make
         sudo make install
-        echo ::set-env name=PATH::$PATH:/usr/local/pspdev/bin:/usr/local/psp/sdk/bin
     - name: Compile
       run: make psp
