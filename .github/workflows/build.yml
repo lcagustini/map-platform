@@ -54,6 +54,6 @@ jobs:
         mkdir -p build-psp && pushd build-psp
         ../configure --with-pspdev=/usr/local --target=psp
         make
-        sudo make install
+        make install
     - name: Compile
       run: make psp
