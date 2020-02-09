@@ -32,7 +32,7 @@
 PSP_MODULE_INFO("platform", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 PSP_HEAP_SIZE_MAX();
-#define printf	pspDebugScreenPrintf
+//#define printf	pspDebugScreenPrintf
 #endif
 
 #ifdef PSP_BUILD
@@ -51,6 +51,7 @@ SDL_Renderer *renderer;
 float dt;
 
 #include "render.c"
+#include "font.c"
 #include "object.c"
 #include "bg.c"
 
@@ -79,6 +80,7 @@ int main(void) {
 
     controller = SDL_JoystickOpen(0);
 
+    initFont();
     loadBG(1);
 
     initObject(0, 10, 10, "gfx/player.png");
@@ -86,11 +88,9 @@ int main(void) {
     SDL_Event e;
     uint64_t last_frame_counter = SDL_GetPerformanceCounter();
     while (true) {
-        {
-            uint64_t cur_frame_counter = SDL_GetPerformanceCounter();
-            dt = (float)(cur_frame_counter - last_frame_counter) / SDL_GetPerformanceFrequency();
-            last_frame_counter = cur_frame_counter;
-        }
+        uint64_t cur_frame_counter = SDL_GetPerformanceCounter();
+        dt = (float)(cur_frame_counter - last_frame_counter) / SDL_GetPerformanceFrequency();
+        last_frame_counter = cur_frame_counter;
 
         while(SDL_PollEvent(&e)) {
             if(e.type == SDL_QUIT) goto exit;
@@ -123,6 +123,8 @@ int main(void) {
             objects[i].rect.y = objects[i].y;
             SDL_RenderCopy(renderer, objects[i].texture, NULL, &objects[i].rect);
         }
+
+        printFont(4, 4, "%d", (int)(1/dt));
 
         SDL_RenderPresent(renderer);
     }
