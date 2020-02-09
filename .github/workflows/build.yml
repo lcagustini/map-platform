@@ -42,19 +42,18 @@ jobs:
         sudo apt-get update -y -qq
         sudo apt-get install -y g++ build-essential autoconf automake cmake doxygen bison flex libncurses5-dev libsdl1.2-dev libreadline-dev libusb-dev texinfo libgmp3-dev libmpfr-dev libelf-dev libmpc-dev libfreetype6-dev zlib1g-dev libtool libtool-bin subversion git tcl unzip wget
         sudo ./toolchain-sudo.sh
-        whereis psp-ranlib
-        whereis psp-gcc
-        echo $PATH
         echo ::set-env name=PATH::$PATH:/usr/local/pspdev/bin
     - name: Install pspsdk
       run: |
+        whereis psp-ranlib
+        whereis psp-gcc
+        echo $PATH
         git clone https://github.com/pspdev/pspsdk
         cd pspsdk
         ./bootstrap
         mkdir -p build-psp && pushd build-psp
         ../configure --with-pspdev=/usr/local --target=psp
         make
-        sudo make install
-        echo ::set-env name=PATH::$PATH:/usr/local/pspdev/bin:/usr/local/psp/sdk/bin
+        make install
     - name: Compile
       run: make psp
