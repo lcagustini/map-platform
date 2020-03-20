@@ -1,8 +1,3 @@
-#define FONT_CHAR_WIDTH 7
-#define FONT_CHAR_HEIGHT 9
-
-SDL_Texture *font;
-
 void initFont() {
     font = loadTexture("gfx/font.png", NULL, NULL);
 }

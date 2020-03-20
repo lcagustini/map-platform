@@ -1,5 +1,3 @@
-SDL_Joystick *controller;
-
 void player_right() {
     objects[0].speed_x += dt*2;
 }

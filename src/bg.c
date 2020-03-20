@@ -1,15 +1,3 @@
-enum tile_hit_type {
-    THT_NONE,
-    THT_WALL,
-};
-
-struct bg_map {
-    enum tile_hit_type tiles[60][34];
-    SDL_Texture *layers_texture[8];
-};
-
-struct bg_map cur_map;
-
 void loadBG(int index) {
     char buffer[50];
 

@@ -35,30 +35,11 @@ PSP_HEAP_SIZE_MAX();
 //#define printf	pspDebugScreenPrintf
 #endif
 
-#ifdef PSP_BUILD
-#define ZOOM 1
-#else
-#define ZOOM 3
-#endif
-
-#define REFERENCE_SCREEN_WIDTH 480
-#define REFERENCE_SCREEN_HEIGHT 272
-#define SCREEN_WIDTH ZOOM*480
-#define SCREEN_HEIGHT ZOOM*272
-
-SDL_Window *window;
-SDL_Renderer *renderer;
-float dt;
-
+#include "common.h"
 #include "render.c"
 #include "font.c"
-#include "object.c"
 #include "bg.c"
-
-bool groundedObject(int index) {
-    return (cur_map.tiles[(int)(objects[index].x + objects[index].rect.w/2)/8][(int)(objects[index].y + objects[index].rect.h)/8]);
-}
-
+#include "object.c"
 #include "input.c"
 
 int main(void) {
@@ -98,16 +79,20 @@ int main(void) {
         handle_constant_input();
 
         objects[0].speed_y += dt*1;
-        if (groundedObject(0) && objects[0].speed_y > 0)
-            objects[0].speed_y = 0;
+        float old_pos = objects[0].y;
         objects[0].y += objects[0].speed_y;
+        if (colidedWithMap(0)) {
+            objects[0].speed_y = 0;
+            objects[0].y = old_pos;
+        }
 
         objects[0].speed_x *= (1-dt)*0.999;
-        if (cur_map.tiles[(int)objects[0].x/8][(int)objects[0].y/8] && objects[0].speed_x < 0)
-            objects[0].speed_x = 0;
-        if (cur_map.tiles[(int)(objects[0].x + objects[0].rect.w)/8][(int)objects[0].y/8] && objects[0].speed_x > 0)
-            objects[0].speed_x = 0;
+        old_pos = objects[0].x;
         objects[0].x += objects[0].speed_x;
+        if (colidedWithMap(0)) {
+            objects[0].speed_x = 0;
+            objects[0].x = old_pos;
+        }
 
         SDL_RenderClear(renderer);
 
