@@ -1,7 +1,14 @@
 #define FONT_CHAR_WIDTH 7
 #define FONT_CHAR_HEIGHT 9
 
+#define PLAYER_ID 0
+#define PLAYER_SPEED 120
+
 #define OBJECT_MAX 300
+#define MAPS_MAX 10
+
+#define GRAVITY 60
+#define PHYSICS_STEPS 5
 
 #ifdef PSP_BUILD
 #define ZOOM 1
@@ -28,8 +35,14 @@ enum tile_hit_type {
 };
 
 struct bg_map {
+    int id;
     enum tile_hit_type tiles[60][34];
     SDL_Texture *layers_texture[8];
+};
+
+struct world_map {
+    int id;
+    int top, bottom, left, right;
 };
 
 struct object {
@@ -41,6 +54,7 @@ struct object {
 };
 
 struct bg_map cur_map;
+struct world_map map_array[MAPS_MAX];
 
 SDL_Joystick *controller;
 

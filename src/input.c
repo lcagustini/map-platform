@@ -1,14 +1,14 @@
 void player_right() {
-    objects[0].speed_x += dt*2;
+    objects[PLAYER_ID].speed_x += dt*PLAYER_SPEED;
 }
 
 void player_left() {
-    objects[0].speed_x -= dt*2;
+    objects[PLAYER_ID].speed_x -= dt*PLAYER_SPEED;
 }
 
 void player_up() {
-    if (groundedObject(0))
-        objects[0].speed_y = -1;
+    if (groundedObject(PLAYER_ID))
+        objects[PLAYER_ID].speed_y = -GRAVITY;
 }
 
 void handle_constant_input() {

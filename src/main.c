@@ -40,31 +40,19 @@ PSP_HEAP_SIZE_MAX();
 #include "font.c"
 #include "bg.c"
 #include "object.c"
+#include "physics.c"
 #include "input.c"
 
 int main(void) {
-#ifdef PSP_BUILD
-    PSPSetupCallbacks();
-#endif
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
-    window = SDL_CreateWindow("platform", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-
-#ifndef PSP_BUILD
-    SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
-#endif
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0xFF, 0xFF);
-
-#ifndef PSP_BUILD
-    SDL_RenderSetScale(renderer, ZOOM, ZOOM);
-#endif
+    initRender();
 
     controller = SDL_JoystickOpen(0);
 
     initFont();
+    loadWorldMap();
     loadBG(1);
 
-    initObject(0, 10, 10, "gfx/player.png");
+    initObject(PLAYER_ID, 10, 10, "gfx/player.png");
 
     SDL_Event e;
     uint64_t last_frame_counter = SDL_GetPerformanceCounter();
@@ -78,40 +66,9 @@ int main(void) {
         }
         handle_constant_input();
 
-        objects[0].speed_y += dt*1;
-        float old_pos = objects[0].y;
-        objects[0].y += objects[0].speed_y;
-        if (colidedWithMap(0)) {
-            objects[0].speed_y = 0;
-            objects[0].y = old_pos;
-        }
+        do_player_physics();
 
-        objects[0].speed_x *= (1-dt)*0.999;
-        old_pos = objects[0].x;
-        objects[0].x += objects[0].speed_x;
-        if (colidedWithMap(0)) {
-            objects[0].speed_x = 0;
-            objects[0].x = old_pos;
-        }
-
-        SDL_RenderClear(renderer);
-
-        for (int i = 0; i < 8; i++) {
-            if (cur_map.layers_texture[i]) {
-                SDL_RenderCopy(renderer, cur_map.layers_texture[i], NULL, NULL);
-            }
-        }
-
-        for (int i = 0; i < OBJECT_MAX; i++) {
-            if (!objects[i].texture) continue;
-            objects[i].rect.x = objects[i].x;
-            objects[i].rect.y = objects[i].y;
-            SDL_RenderCopy(renderer, objects[i].texture, NULL, &objects[i].rect);
-        }
-
-        printFont(4, 4, "%d", (int)(1/dt));
-
-        SDL_RenderPresent(renderer);
+        draw();
     }
 
 exit:
