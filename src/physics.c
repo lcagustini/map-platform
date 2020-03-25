@@ -29,12 +29,56 @@ bool colidedWithMap(int index) {
     return false;
 }
 
-inline bool groundedObject(int index) {
-    return objects[index].speed_y == 0;
+bool onSolidTile(int index, enum direction dir) {
+    bool stopped = false;
+    bool wall_on_dir = false;
+
+    int left_tile = objects[index].x / 8;
+    int right_tile = (objects[index].x + objects[index].rect.w) / 8;
+    int top_tile = objects[index].y / 8;
+    int bottom_tile = (objects[index].y + objects[index].rect.h) / 8;
+
+    int offset_tile;
+    switch (dir) {
+        case D_UP:
+            offset_tile = (objects[index].y - 1) / 8;
+            for (int i = left_tile; i <= right_tile; i++) {
+                wall_on_dir |= cur_map.tiles[i][offset_tile];
+            }
+
+            stopped = objects[index].speed_y == 0;
+            break;
+        case D_DOWN:
+            offset_tile = (objects[index].y + objects[index].rect.h + 1) / 8;
+            for (int i = left_tile; i <= right_tile; i++) {
+                wall_on_dir |= cur_map.tiles[i][offset_tile];
+            }
+
+            stopped = objects[index].speed_y == 0;
+            break;
+        case D_LEFT:
+            offset_tile = (objects[index].x - 1) / 8;
+            for (int i = top_tile; i <= bottom_tile; i++) {
+                wall_on_dir |= cur_map.tiles[offset_tile][i];
+            }
+
+            stopped = objects[index].speed_x == 0;
+            break;
+        case D_RIGHT:
+            offset_tile = (objects[index].x + objects[index].rect.w + 1) / 8;
+            for (int i = top_tile; i <= bottom_tile; i++) {
+                wall_on_dir |= cur_map.tiles[offset_tile][i];
+            }
+
+            stopped = objects[index].speed_x == 0;
+            break;
+        default:
+            stopped = wall_on_dir = false;
+    }
+    return stopped && wall_on_dir;
 }
 
 void do_player_physics() {
-    objects[PLAYER_ID].speed_x *= (1-dt)*0.99;
     objects[PLAYER_ID].speed_y += dt*GRAVITY;
 
     for (int i = 0; i < PHYSICS_STEPS; i++) {
