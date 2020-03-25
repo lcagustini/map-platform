@@ -14,11 +14,7 @@
 #define GRAVITY 150
 #define PHYSICS_STEPS 5
 
-#ifdef PSP_BUILD
-#define ZOOM 1
-#else
 #define ZOOM 3
-#endif
 
 #define REFERENCE_SCREEN_WIDTH 480
 #define REFERENCE_SCREEN_HEIGHT 272

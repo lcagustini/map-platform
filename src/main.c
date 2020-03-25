@@ -10,30 +10,7 @@
 #include <math.h>
 #include <string.h>
 
-#ifdef PSP_BUILD
-#include <pspkernel.h>
-#include <pspdisplay.h>
-#include <pspdebug.h>
-#include <pspctrl.h>
-
-#include <pspgu.h>
-#include <pspgum.h>
-
-#include "pspcallback.c"
-#endif
-
-#ifdef PSP_BUILD
-#include <SDL.h>
-#else
 #include <SDL2/SDL.h>
-#endif
-
-#ifdef PSP_BUILD
-PSP_MODULE_INFO("platform", 0, 1, 1);
-PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
-PSP_HEAP_SIZE_MAX();
-//#define printf	pspDebugScreenPrintf
-#endif
 
 #include "common.h"
 #include "render.c"

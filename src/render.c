@@ -32,12 +32,8 @@ void initRender() {
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0xFF, 0xFF);
 
-#ifndef PSP_BUILD
     SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
     SDL_RenderSetScale(renderer, ZOOM, ZOOM);
-#else
-    PSPSetupCallbacks();
-#endif
 }
 
 void draw() {
